@@ -1,0 +1,135 @@
+<div class="expense-list-container">
+  <div class="header">
+    <div class="header-content">
+      <h1>My Expenses</h1>
+      <button class="btn btn-primary" (click)="addExpense()">
+        <span class="plus-icon">+</span>
+        Add Expense
+      </button>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="summary-card">
+      <div class="summary-item">
+        <span class="label">Total Expenses</span>
+        <span class="value">{{ formatCurrency(totalAmount) }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">This Month</span>
+        <span class="value">{{ filteredExpenses.length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <input
+        type="text"
+        placeholder="Search expenses..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <div class="filter-controls">
+      <select
+        [(ngModel)]="selectedCategory"
+        (change)="onCategoryFilterChange()"
+        class="filter-select"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+
+      <select
+        [(ngModel)]="sortBy"
+        (change)="onSortChange()"
+        class="filter-select"
+      >
+        <option value="date">Sort by Date</option>
+        <option value="amount">Sort by Amount</option>
+        <option value="category">Sort by Category</option>
+      </select>
+
+      <button class="btn btn-secondary sort-btn" (click)="toggleSortOrder()">
+        {{ sortOrder === 'desc' ? '↓' : '↑' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+    <button class="retry-btn" (click)="loadExpenses()">Retry</button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading expenses...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !errorMessage && filteredExpenses.length === 0" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h3>No expenses found</h3>
+    <p *ngIf="searchTerm || selectedCategory">Try adjusting your filters or search terms.</p>
+    <p *ngIf="!searchTerm && !selectedCategory">Start by adding your first expense!</p>
+    <button class="btn btn-primary" (click)="addExpense()">Add Your First Expense</button>
+  </div>
+
+  <!-- Expense List -->
+  <div *ngIf="!loading && !errorMessage && filteredExpenses.length > 0" class="expense-grid">
+    <div
+      *ngFor="let expense of filteredExpenses"
+      class="expense-card"
+      [class.recurring]="expense.isRecurring"
+    >
+      <div class="expense-header">
+        <div class="category-badge" [style.background-color]="getCategoryColor(expense.categoryId)">
+          {{ getCategoryName(expense.categoryId) }}
+        </div>
+        <div class="expense-actions">
+          <button class="action-btn edit-btn" (click)="editExpense(expense)" title="Edit">
+            ✏️
+          </button>
+          <button class="action-btn delete-btn" (click)="deleteExpense(expense)" title="Delete">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <div class="expense-content">
+        <div class="expense-amount">
+          {{ formatCurrency(expense.amount) }}
+        </div>
+        <div class="expense-date">
+          {{ formatDate(expense.date) }}
+        </div>
+        <div class="expense-method">
+          {{ expense.paymentMethod }}
+        </div>
+      </div>
+
+      <div class="expense-description" *ngIf="expense.description">
+        {{ expense.description }}
+      </div>
+
+      <div class="recurring-badge" *ngIf="expense.isRecurring">
+        🔄 Recurring
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Dialog -->
+  <app-edit-expense-dialog
+    *ngIf="showEditDialog"
+    [expense]="selectedExpense"
+    (close)="onEditDialogClose($event)"
+  ></app-edit-expense-dialog>
+</div>

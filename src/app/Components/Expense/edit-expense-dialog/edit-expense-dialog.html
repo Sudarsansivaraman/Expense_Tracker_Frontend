@@ -1,0 +1,128 @@
+<div class="dialog-backdrop" (click)="onBackdropClick($event)">
+  <div class="dialog-content">
+    <div class="dialog-header">
+      <h2>Edit Expense</h2>
+      <button type="button" class="close-btn" (click)="onCancel()" title="Close">
+        ✕
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form" *ngIf="expense">
+      <!-- Category Selection -->
+      <div class="form-group">
+        <label for="categoryId">Category *</label>
+        <select
+          id="categoryId"
+          formControlName="categoryId"
+          class="form-control"
+          [class.is-invalid]="submitted && f['categoryId'].errors"
+        >
+          <option value="">Select a category</option>
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+        <div *ngIf="submitted && f['categoryId'].errors" class="error-text">
+          Category is required
+        </div>
+      </div>
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label for="amount">Amount *</label>
+        <div class="amount-input">
+          <span class="currency-symbol">₹</span>
+          <input
+            type="number"
+            id="amount"
+            formControlName="amount"
+            class="form-control"
+            [class.is-invalid]="submitted && f['amount'].errors"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+          />
+        </div>
+        <div *ngIf="submitted && f['amount'].errors" class="error-text">
+          <span *ngIf="f['amount'].errors['required']">Amount is required</span>
+          <span *ngIf="f['amount'].errors['min']">Amount must be greater than 0</span>
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label for="date">Date *</label>
+        <input
+          type="date"
+          id="date"
+          formControlName="date"
+          class="form-control"
+          [class.is-invalid]="submitted && f['date'].errors"
+        />
+        <div *ngIf="submitted && f['date'].errors" class="error-text">
+          Date is required
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="form-group">
+        <label for="paymentMethod">Payment Method *</label>
+        <select
+          id="paymentMethod"
+          formControlName="paymentMethod"
+          class="form-control"
+          [class.is-invalid]="submitted && f['paymentMethod'].errors"
+        >
+          <option value="">Select payment method</option>
+          <option *ngFor="let method of paymentMethods" [value]="method">
+            {{ method }}
+          </option>
+        </select>
+        <div *ngIf="submitted && f['paymentMethod'].errors" class="error-text">
+          Payment method is required
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          placeholder="Optional description..."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Recurring Checkbox -->
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="isRecurring"
+            class="checkbox-input"
+          />
+          <span class="checkmark"></span>
+          This is a recurring expense
+        </label>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Updating...' : 'Update Expense' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
